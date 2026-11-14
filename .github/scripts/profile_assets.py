@@ -2,6 +2,7 @@
 import json
 import os
 from collections import Counter
+from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -78,7 +79,49 @@ def main():
     for theme in ['dark', 'light']:
         (OUT / f'languages-{theme}.svg').write_text(
             svg(theme, 154, 'Language share by bytes in public non-fork repositories', lang, 420))
-    print('Generated light and dark language SVGs from public GitHub data.')
+    counts = api(f'users/{USER}/events/public?per_page=100')
+    event_types = Counter(event['type'] for event in counts)
+    cards = {
+        'base': ('GitHub activity', [
+            ('Public repositories', len(owned)),
+            ('Recent public events', len(counts)),
+            ('Recent push events', event_types['PushEvent']),
+            ('Recent pull request events', event_types['PullRequestEvent']),
+        ]),
+        'followup': ('Issues and pull requests', [
+            ('Recent pull request events', event_types['PullRequestEvent']),
+            ('Recent issue events', event_types['IssuesEvent']),
+            ('Recent issue comment events', event_types['IssueCommentEvent']),
+        ]),
+    }
+    for key, (title, rows) in cards.items():
+        content = f'<text x="26" y="32" font-size="16" fill="ACCENT">{escape(title)}</text>'
+        for i, (label, value) in enumerate(rows):
+            content += f'<text x="26" y="{67 + i * 27}" font-size="14" fill="FG">{escape(label)}: {value}</text>'
+        for theme in ['dark', 'light']:
+            (OUT / f'metrics.{key}-{theme}.svg').write_text(svg(theme, 80 + len(rows) * 27, title, content, 420))
+    days = Counter(event['created_at'][:10] for event in counts)
+    today = datetime.now(timezone.utc).date()
+    content = '<text x="26" y="30" font-size="16" fill="ACCENT">Recent public activity</text>'
+    for i in range(84):
+        day = today - timedelta(days=83-i)
+        count = days[day.isoformat()]
+        color = '#7546d8' if count >= 3 else '#b89aff' if count else '#30363d'
+        x = 26 + (i // 7) * 31
+        y = 48 + (i % 7) * 22
+        content += f'<rect x="{x}" y="{y}" width="17" height="17" rx="3" fill="{color}"/>'
+    content += '<text x="26" y="220" font-size="11" fill="MUTED">Last 84 days · public events returned by GitHub</text>'
+    for theme in ['dark', 'light']:
+        (OUT / f'metrics.isocalendar-{theme}.svg').write_text(svg(theme, 235, 'Recent public activity calendar', content, 420))
+    stars = api(f'users/{USER}/starred?per_page=4')
+    content = '<text x="26" y="32" font-size="16" fill="ACCENT">Recently starred</text>'
+    for i, repo in enumerate(stars):
+        content += f'<text x="26" y="{65 + i * 27}" font-size="14" fill="FG">{escape(repo["full_name"])}</text>'
+    if not stars:
+        content += '<text x="26" y="65" font-size="14" fill="MUTED">No public stars yet.</text>'
+    for theme in ['dark', 'light']:
+        (OUT / f'metrics.stars-{theme}.svg').write_text(svg(theme, 90 + len(stars) * 27, 'Recently starred', content, 420))
+    print('Generated public profile metrics and language SVGs.')
 
 
 if __name__ == '__main__':
