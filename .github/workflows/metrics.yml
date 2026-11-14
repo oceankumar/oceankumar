@@ -1,0 +1,77 @@
+name: GitHub Metrics
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/metrics.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: github-metrics
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Base metrics
+        uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6 # latest, pinned
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          user: oceankumar
+          filename: metrics.base.svg
+          template: classic
+          config_timezone: Asia/Kolkata
+          config_display: large
+          base: header, activity, community, repositories, metadata
+          repositories_forks: no
+          plugin_languages: yes
+          plugin_languages_limit: 8
+          plugin_languages_sections: most-used
+          plugin_lines: yes
+
+      - name: Isometric contribution calendar
+        uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          user: oceankumar
+          filename: metrics.isocalendar.svg
+          template: classic
+          config_timezone: Asia/Kolkata
+          config_display: large
+          base: ''
+          plugin_isocalendar: yes
+          plugin_isocalendar_duration: full-year
+
+      - name: Issues and pull requests
+        uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          user: oceankumar
+          filename: metrics.followup.svg
+          template: classic
+          config_timezone: Asia/Kolkata
+          config_display: large
+          base: ''
+          plugin_followup: yes
+          plugin_followup_sections: repositories, user
+
+      - name: Recently starred
+        uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          user: oceankumar
+          filename: metrics.stars.svg
+          template: classic
+          config_timezone: Asia/Kolkata
+          config_display: large
+          base: ''
+          plugin_stars: yes
+          plugin_stars_limit: 4
