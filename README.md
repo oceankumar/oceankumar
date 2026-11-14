@@ -56,22 +56,6 @@ const ocean = {
 
 CS & AI student building useful software across **AI integrations, APIs, and full-stack systems**. A builder's mindset, with a designer's eye.
 
----
-
-## 📈 Language Statistics
-
-<div align="center">
-
-<!-- Original language statistics retained -->
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/oceankumar/OceanKumar/output/languages-dark.svg?v=2" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/oceankumar/OceanKumar/output/languages-light.svg?v=2" />
-  <img src="https://raw.githubusercontent.com/oceankumar/OceanKumar/output/languages-light.svg?v=2" width="480" alt="Language mix across public non-fork repositories" />
-</picture>
-
-</div>
-
----
 
 ## 🐍 Contribution Snake
 
